@@ -100,14 +100,13 @@
         // ĐIỀN MÃ FIREBASE CỦA BẠN VÀO ĐÂY
         // =========================================================================
         const firebaseConfig = {
-             apiKey: "AIzaSyBASXjlpn_U81L7C6CtvvpPB_KfbXuO_IA",
-  authDomain: "quanlihocsinh-e29bd.firebaseapp.com",
-  databaseURL: "https://quanlihocsinh-e29bd-default-rtdb.firebaseio.com",
-  projectId: "quanlihocsinh-e29bd",
-  storageBucket: "quanlihocsinh-e29bd.firebasestorage.app",
-  messagingSenderId: "1011350811634",
-  appId: "1:1011350811634:web:70fe410edb1dab888d316b",
-  measurementId: "G-1ER2DQQF95"
+            apiKey: "BẠN_ĐIỀN_API_KEY_CỦA_BẠN_ĐÂY",
+            authDomain: "BẠN_ĐIỀN_AUTH_DOMAIN_VÀO_ĐÂY",
+            databaseURL: "BẠN_ĐIỀN_LINK_DATABASE_VÀO_ĐÂY",
+            projectId: "BẠN_ĐIỀN_PROJECT_ID_VÀO_ĐÂY",
+            storageBucket: "BẠN_ĐIỀN_STORAGE_BUCKET_VÀO_ĐÂY",
+            messagingSenderId: "BẠN_ĐIỀN_SENDER_ID_VÀO_ĐÂY",
+            appId: "BẠN_ĐIỀN_APP_ID_VÀO_ĐÂY"
         };
         // =========================================================================
 
@@ -121,11 +120,13 @@
             document.getElementById('submitBtn').style.display = 'none';
         }
 
+        let tasksRef, metaRef, database;
+
         if (firebaseConfig.apiKey !== "BẠN_ĐIỀN_API_KEY_CỦA_BẠN_ĐÂY") {
             firebase.initializeApp(firebaseConfig);
-            const database = firebase.database();
-            var tasksRef = database.ref('phuong-anh/nhiem-vu');
-            var metaRef = database.ref('phuong-anh/thong-tin-nop');
+            database = firebase.database();
+            tasksRef = database.ref('phuong-anh/nhiem-vu');
+            metaRef = database.ref('phuong-anh/thong-tin-nop');
 
             // Lắng nghe dữ liệu nhiệm vụ
             tasksRef.on('value', (snapshot) => {
@@ -169,10 +170,14 @@
             // Lắng nghe thông tin nộp bài (Hiển thị cho giáo viên)
             metaRef.on('value', (snapshot) => {
                 const meta = snapshot.val();
-                if (meta) {
+                if (meta && meta.count > 0) {
                     document.getElementById('submitStatus').innerHTML = `<b>Trạng thái:</b> <span style="color: green;">Đã nộp bài ✅</span>`;
-                    document.getElementById('submitCount').innerHTML = `<b>Số lần nộp:</b> ${meta.count || 0} lần`;
-                    document.getElementById('submitTime').innerHTML = `<b>Thời gian nộp gần nhất:</b> ${meta.lastTime || 'Chưa có'}`;
+                    document.getElementById('submitCount').innerHTML = `<b>Số lần nộp:</b> ${meta.count} lần`;
+                    document.getElementById('submitTime').innerHTML = `<b>Thời gian nộp gần nhất:</b> ${meta.lastTime}`;
+                } else {
+                    document.getElementById('submitStatus').innerHTML = `<b>Trạng thái:</b> <span style="color: #d32f2f;">Chưa nộp bài ❌</span>`;
+                    document.getElementById('submitCount').innerHTML = `<b>Số lần nộp:</b> 0 lần`;
+                    document.getElementById('submitTime').innerHTML = `<b>Thời gian nộp gần nhất:</b> Chưa có`;
                 }
             });
         }
@@ -181,8 +186,13 @@
         window.addTask = function() {
             if (!isTeacher) return;
             let input = document.getElementById("taskInput");
-            if (input.value.trim() === "") return alert("Chưa nhập nhiệm vụ!");
-            tasksRef.push({ text: input.value.trim(), completed: false, reason: "" });
+            if (!input || input.value.trim() === "") return alert("Chưa nhập nhiệm vụ!");
+            
+            tasksRef.push({ 
+                text: input.value.trim(), 
+                completed: false, 
+                reason: "" 
+            });
             input.value = ""; 
         };
 
@@ -191,25 +201,26 @@
         window.updateReason = function(taskId, reasonText) { if (tasksRef) tasksRef.child(taskId).update({ reason: reasonText }); };
         window.deleteTask = function(taskId) { if (isTeacher && tasksRef) tasksRef.child(taskId).remove(); };
 
-        // Xử lý khi Phương Anh bấm Gửi bài
+        // Xử lý khi Phương Anh bấm Gửi bài (Tối ưu hóa ghi dữ liệu)
         window.sendToTeacher = function() {
             const now = new Date();
             const timeString = now.toLocaleDateString('vi-VN') + ' lúc ' + now.toLocaleTimeString('vi-VN');
 
-            // Đọc số lần nộp hiện tại rồi cộng thêm 1
-            database.ref('phuong-anh/thong-tin-nop').once('value').then((snapshot) => {
+            metaRef.once('value').then((snapshot) => {
                 const currentData = snapshot.val() || { count: 0 };
-                const newCount = currentData.count + 1;
+                const newCount = (Number(currentData.count) || 0) + 1;
 
-                // Lưu lại lịch sử lên Firebase
-                database.ref('phuong-anh/thong-tin-nop').set({
+                metaRef.set({
                     count: newCount,
                     lastTime: timeString
+                }).then(() => {
+                    // Sau khi lưu thành công thì bật hiệu ứng pháo hoa và bảng thông báo
+                    shootConfetti();
+                    document.getElementById('congratsModal').style.display = 'flex';
+                }).catch((error) => {
+                    alert("Có lỗi khi lưu bài: " + error.message);
                 });
             });
-
-            shootConfetti();
-            document.getElementById('congratsModal').style.display = 'flex';
         };
 
         function shootConfetti() {
