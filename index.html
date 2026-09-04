@@ -97,16 +97,17 @@
 
     <script>
         // =========================================================================
-        // ĐIỀN MÃ FIREBASE CỦA BẠN VÀO ĐÂY
+        // BƯỚC QUAN TRỌNG: ĐIỀN MÃ FIREBASE CỦA BẠN VÀO ĐÂY
         // =========================================================================
         const firebaseConfig = {
-            apiKey: "BẠN_ĐIỀN_API_KEY_CỦA_BẠN_ĐÂY",
-            authDomain: "BẠN_ĐIỀN_AUTH_DOMAIN_VÀO_ĐÂY",
-            databaseURL: "BẠN_ĐIỀN_LINK_DATABASE_VÀO_ĐÂY",
-            projectId: "BẠN_ĐIỀN_PROJECT_ID_VÀO_ĐÂY",
-            storageBucket: "BẠN_ĐIỀN_STORAGE_BUCKET_VÀO_ĐÂY",
-            messagingSenderId: "BẠN_ĐIỀN_SENDER_ID_VÀO_ĐÂY",
-            appId: "BẠN_ĐIỀN_APP_ID_VÀO_ĐÂY"
+           apiKey : "AIzaSyBASXjlpn_U81L7C6CtvvpPB_KfbXuO_IA" , 
+  authDomain : "quanlihocsinh-e29bd.firebaseapp.com" , 
+  URL cơ sở dữ liệu : "https://quanlihocsinh-e29bd-default-rtdb.firebaseio.com" , 
+  projectId : "quanlihocsinh-e29bd" , 
+  storageBucket : "quanlihocsinh-e29bd.firebasestorage.app" , 
+  messagingSenderId : "1011350811634" , 
+  appId : "1:1011350811634:web:70fe410edb1dab888d316b" , 
+  measurementId : "G-1ER2DQQF95" 
         };
         // =========================================================================
 
@@ -120,15 +121,21 @@
             document.getElementById('submitBtn').style.display = 'none';
         }
 
-        let tasksRef, metaRef, database;
+        let database, tasksRef, metaRef;
 
-        if (firebaseConfig.apiKey !== "BẠN_ĐIỀN_API_KEY_CỦA_BẠN_ĐÂY") {
-            firebase.initializeApp(firebaseConfig);
+        if (firebaseConfig.apiKey === "BẠN_ĐIỀN_API_KEY_CỦA_BẠN_ĐÂY") {
+            alert("⚠️ BẠN CHƯA DÁN MÃ FIREBASE VÀO CODE TRONG FILE INDEX.HTML!");
+        } else {
+            // Khởi tạo an toàn (tránh lỗi trùng lặp app)
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            
             database = firebase.database();
             tasksRef = database.ref('phuong-anh/nhiem-vu');
             metaRef = database.ref('phuong-anh/thong-tin-nop');
 
-            // Lắng nghe dữ liệu nhiệm vụ
+            // Lắng nghe dữ liệu nhiệm vụ realtime
             tasksRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 const ul = document.getElementById("taskList");
@@ -167,7 +174,7 @@
                 }
             });
 
-            // Lắng nghe thông tin nộp bài (Hiển thị cho giáo viên)
+            // Lắng nghe thông tin nộp bài
             metaRef.on('value', (snapshot) => {
                 const meta = snapshot.val();
                 if (meta && meta.count > 0) {
@@ -182,29 +189,55 @@
             });
         }
 
-        // CÁC HÀM XỬ LÝ
+        // CÁC HÀM XỬ LÝ SỰ KIỆN CHÍNH XÁC 100%
         window.addTask = function() {
             if (!isTeacher) return;
             let input = document.getElementById("taskInput");
-            if (!input || input.value.trim() === "") return alert("Chưa nhập nhiệm vụ!");
+            if (!input || input.value.trim() === "") {
+                alert("Bạn chưa nhập nội dung nhiệm vụ!");
+                return;
+            }
+            if (!tasksRef) {
+                alert("Lỗi: Chưa kết nối được với cơ sở dữ liệu Firebase!");
+                return;
+            }
             
             tasksRef.push({ 
                 text: input.value.trim(), 
                 completed: false, 
                 reason: "" 
+            }).then(() => {
+                input.value = ""; 
+            }).catch((error) => {
+                alert("Lỗi khi đẩy dữ liệu lên Firebase: " + error.message);
             });
-            input.value = ""; 
         };
 
-        window.handleKeyPress = function(event) { if (event.key === "Enter") window.addTask(); };
-        window.toggleTask = function(taskId, isChecked) { if (tasksRef) tasksRef.child(taskId).update({ completed: isChecked }); };
-        window.updateReason = function(taskId, reasonText) { if (tasksRef) tasksRef.child(taskId).update({ reason: reasonText }); };
-        window.deleteTask = function(taskId) { if (isTeacher && tasksRef) tasksRef.child(taskId).remove(); };
+        window.handleKeyPress = function(event) { 
+            if (event.key === "Enter") window.addTask(); 
+        };
 
-        // Xử lý khi Phương Anh bấm Gửi bài (Tối ưu hóa ghi dữ liệu)
+        window.toggleTask = function(taskId, isChecked) { 
+            if (tasksRef) tasksRef.child(taskId).update({ completed: isChecked }); 
+        };
+
+        window.updateReason = function(taskId, reasonText) { 
+            if (tasksRef) tasksRef.child(taskId).update({ reason: reasonText }); 
+        };
+
+        window.deleteTask = function(taskId) { 
+            if (isTeacher && tasksRef) tasksRef.child(taskId).remove(); 
+        };
+
+        // Xử lý khi Phương Anh bấm Gửi bài
         window.sendToTeacher = function() {
             const now = new Date();
             const timeString = now.toLocaleDateString('vi-VN') + ' lúc ' + now.toLocaleTimeString('vi-VN');
+
+            if (!metaRef) {
+                alert("Lỗi kết nối Firebase!");
+                return;
+            }
 
             metaRef.once('value').then((snapshot) => {
                 const currentData = snapshot.val() || { count: 0 };
@@ -214,11 +247,10 @@
                     count: newCount,
                     lastTime: timeString
                 }).then(() => {
-                    // Sau khi lưu thành công thì bật hiệu ứng pháo hoa và bảng thông báo
                     shootConfetti();
                     document.getElementById('congratsModal').style.display = 'flex';
                 }).catch((error) => {
-                    alert("Có lỗi khi lưu bài: " + error.message);
+                    alert("Lỗi khi gửi bài: " + error.message);
                 });
             });
         };
@@ -233,7 +265,9 @@
             }, 250);
         }
 
-        window.closeModal = function() { document.getElementById('congratsModal').style.display = 'none'; };
+        window.closeModal = function() { 
+            document.getElementById('congratsModal').style.display = 'none'; 
+        };
     </script>
 </body>
 </html>
