@@ -3,295 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bảng Nhiệm Vụ Hàng Ngày 🌟</title>
-    <!-- Font chữ dễ thương -->
+    <title>Bảng Nhiệm Vụ 🌟</title>
+    <!-- Font chữ -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
-    <!-- Thư viện pháo hoa -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
-    <!-- Thư viện Firebase -->
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
-        :root {
-            --bg-color: #fce4ec; 
-            --card-bg: #ffffff;
-            --text-color: #4a4a4a;
-            --primary-color: #ff8a80; 
-            --check-color: #00bfa5; 
-        }
-
-        body {
-            font-family: 'Nunito', sans-serif;
-            background-color: var(--bg-color);
-            background-image: radial-gradient(#ffcdd2 2px, transparent 2px);
-            background-size: 30px 30px;
-            color: var(--text-color);
-            display: flex;
-            justify-content: center;
-            padding: 40px 20px;
-            margin: 0;
-        }
-
-        .container {
-            background-color: var(--card-bg);
-            width: 100%;
-            max-width: 500px;
-            padding: 30px;
-            border-radius: 25px;
-            box-shadow: 0 10px 30px rgba(255, 138, 128, 0.2);
-            text-align: center;
-            position: relative;
-            z-index: 1;
-        }
-
+        :root { --bg-color: #fce4ec; --card-bg: #ffffff; --text-color: #4a4a4a; --primary-color: #ff8a80; --check-color: #00bfa5; }
+        body { font-family: 'Nunito', sans-serif; background-color: var(--bg-color); background-image: radial-gradient(#ffcdd2 2px, transparent 2px); background-size: 30px 30px; color: var(--text-color); display: flex; justify-content: center; padding: 40px 20px; margin: 0; }
+        .container { background-color: var(--card-bg); width: 100%; max-width: 600px; padding: 30px; border-radius: 25px; box-shadow: 0 10px 30px rgba(255, 138, 128, 0.2); text-align: center; position: relative; z-index: 1; }
         h1 { color: var(--primary-color); font-size: 28px; margin-bottom: 5px; }
         p.subtitle { color: #888; font-size: 16px; margin-bottom: 25px; }
 
-        .input-section { display: flex; gap: 10px; margin-bottom: 25px; }
+        /* MẶC ĐỊNH ẨN KHU VỰC THÊM/XÓA CỦA GIÁO VIÊN */
+        .input-section { display: none; gap: 10px; margin-bottom: 25px; }
+        .delete-btn { display: none; margin-left: auto; background: none; border: none; font-size: 20px; cursor: pointer; color: #ff8a80; transition: 0.3s; }
         
-        input[type="text"] {
-            flex: 1;
-            padding: 12px 20px;
-            border: 2px solid #ffcdd2;
-            border-radius: 15px;
-            font-size: 16px;
-            font-family: 'Nunito', sans-serif;
-            outline: none;
-            transition: 0.3s;
-        }
-        input[type="text"]:focus { border-color: var(--primary-color); }
+        /* HIỂN THỊ KHI Ở CHẾ ĐỘ GIÁO VIÊN */
+        .teacher-mode .input-section { display: flex; }
+        .teacher-mode .delete-btn { display: inline-block; }
 
-        button.add-btn {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 15px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-            font-family: 'Nunito', sans-serif;
-        }
-        button.add-btn:hover { background-color: #ff5252; transform: translateY(-2px); }
-
+        input[type="text"].task-input { flex: 1; padding: 12px 20px; border: 2px solid #ffcdd2; border-radius: 15px; font-size: 16px; font-family: 'Nunito', sans-serif; outline: none; transition: 0.3s; }
+        button.add-btn { background-color: var(--primary-color); color: white; border: none; padding: 12px 25px; border-radius: 15px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        
         ul { list-style: none; padding: 0; margin: 0; }
+        li { background-color: #f9fbe7; margin-bottom: 15px; padding: 15px 20px; border-radius: 15px; display: flex; align-items: center; flex-wrap: wrap; font-size: 18px; font-weight: 600; transition: 0.3s; }
+        input[type="checkbox"] { width: 24px; height: 24px; margin-right: 15px; accent-color: var(--check-color); cursor: pointer; }
         
-        li {
-            background-color: #f9fbe7; 
-            margin-bottom: 15px;
-            padding: 15px 20px;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            font-size: 18px;
-            font-weight: 600;
-            transition: 0.3s;
-            border: 2px dashed transparent;
-        }
-        li:hover { transform: scale(1.02); border-color: #dce775; }
+        /* Ô nhập lý do của học sinh */
+        .reason-input { width: 100%; margin-top: 10px; padding: 8px 15px; border: 1px dashed #ccc; border-radius: 10px; font-size: 14px; font-family: 'Nunito', sans-serif; outline: none; }
+        .reason-input:focus { border-color: var(--check-color); }
+        
+        li.completed { background-color: #e0f2f1; color: #9e9e9e; }
+        li.completed .task-text { text-decoration: line-through; opacity: 0.7; }
 
-        input[type="checkbox"] {
-            width: 24px;
-            height: 24px;
-            margin-right: 15px;
-            accent-color: var(--check-color);
-            cursor: pointer;
-        }
+        /* Nút gửi */
+        .send-btn { background-color: #4CAF50; color: white; border: none; padding: 15px 30px; border-radius: 15px; font-size: 18px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 20px; transition: 0.3s; font-family: 'Nunito', sans-serif; }
+        
+        /* Trạng thái khóa nút Gửi khi chưa làm bài */
+        .send-btn:disabled { background-color: #cccccc; cursor: not-allowed; opacity: 0.7; transform: none !important; }
+        .send-btn:not(:disabled):hover { background-color: #45a049; transform: translateY(-2px); }
 
-        li.completed {
-            background-color: #e0f2f1;
-            color: #9e9e9e;
-            text-decoration: line-through;
-            border-color: transparent;
-        }
-        li.completed .task-text { opacity: 0.7; }
-
-        .delete-btn {
-            margin-left: auto;
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            color: #ff8a80;
-            transition: 0.3s;
-        }
-        .delete-btn:hover { color: #d32f2f; transform: scale(1.2); }
-
-        /* Nút gửi cho giáo viên */
-        .send-btn {
-            background-color: #4CAF50; 
-            color: white; 
-            border: none; 
-            padding: 15px 30px;
-            border-radius: 15px; 
-            font-size: 18px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            width: 100%; 
-            margin-top: 20px; 
-            transition: 0.3s; 
-            font-family: 'Nunito', sans-serif;
-        }
-        .send-btn:hover { background-color: #45a049; transform: translateY(-2px); }
-
-        /* Bảng chúc mừng */
-        .modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.4); justify-content: center; align-items: center;
-            z-index: 1000; animation: fadeIn 0.3s ease-in-out;
-        }
-        .modal-content {
-            background: white; padding: 40px; border-radius: 25px;
-            text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            max-width: 350px; transform: scale(0.8); animation: popUp 0.3s forwards;
-        }
-        .modal-content h2 { color: #ff5252; font-size: 26px; margin-top: 0; margin-bottom: 10px; }
-        .modal-content p { font-size: 18px; color: #555; margin-bottom: 25px; }
-        .close-modal-btn {
-            background-color: var(--check-color); color: white; border: none;
-            padding: 12px 30px; border-radius: 15px; font-size: 18px; font-weight: bold;
-            cursor: pointer; transition: 0.3s; font-family: 'Nunito', sans-serif;
-        }
-        .close-modal-btn:hover { background-color: #009688; }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes popUp { to { transform: scale(1); } }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; padding: 40px; border-radius: 25px; text-align: center; max-width: 350px; }
+        .modal-content h2 { color: #ff5252; margin-top: 0; }
+        .close-modal-btn { background-color: var(--check-color); color: white; border: none; padding: 12px 30px; border-radius: 15px; font-size: 16px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>✨ Nhật Ký Nhiệm Vụ ✨</h1>
-        <p class="subtitle">Những việc hôm nay Phương Anh cần làm  🟢</p>
+        <h1 id="pageTitle">✨ Nhiệm Vụ Hôm Nay ✨</h1>
+        <p class="subtitle" id="statusText">Dành cho học sinh</p>
 
+        <!-- Khu vực này sẽ TỰ ĐỘNG ẨN đối với học sinh -->
         <div class="input-section">
-            <input type="text" id="taskInput" placeholder="Ví dụ: Làm bài tập Toán 📚..." onkeypress="handleKeyPress(event)">
-            <button class="add-btn" onclick="addTask()">Thêm</button>
+            <input type="text" id="taskInput" class="task-input" placeholder="Giáo viên nhập nhiệm vụ..." onkeypress="handleKeyPress(event)">
+            <button class="add-btn" onclick="addTask()">Giao việc</button>
         </div>
 
         <ul id="taskList">
-            <!-- Dữ liệu tải từ mạng sẽ hiển thị ở đây -->
+            <!-- Dữ liệu hiển thị ở đây -->
         </ul>
         
-        <!-- SEND -->
-        <button class="send-btn" onclick="sendToTeacher()">SEND🚀</button>
+        <!-- Nút Gửi bị khóa mặc định (disabled) -->
+        <button id="submitBtn" class="send-btn" onclick="sendToTeacher()" disabled>Gửi bài cho giáo viên 🚀</button>
     </div>
 
-    <!-- Hộp thoại chúc mừng khi Gửi -->
+    <!-- Hộp thoại -->
     <div class="modal" id="congratsModal">
         <div class="modal-content">
-            <h2>Tuyệt vời quá! 🎉</h2>
-            <p>Báo cáo của Panh đã được gửi thành công. Em iu làm tốt lắm! 🌟</p>
+            <h2>Hoàn thành! 🎉</h2>
+            <p>Báo cáo và lý do của em đã được gửi thành công. Làm tốt lắm!</p>
             <button class="close-modal-btn" onclick="closeModal()">Đóng</button>
         </div>
     </div>
 
     <script>
         // =========================================================================
-        // BƯỚC QUAN TRỌNG: COPY CẤU HÌNH FIREBASE CỦA BẠN VÀ DÁN VÀO BÊN DƯỚI
-        // (Xóa chữ tiếng Việt và dán vào giữa 2 dấu ngoặc kép "")
+        // ĐIỀN MÃ FIREBASE CỦA BẠN VÀO ĐÂY (GIỮ NGUYÊN DẤU NGOẶC KÉP "")
         // =========================================================================
         const firebaseConfig = {
-             apiKey : "AIzaSyBASXjlpn_U81L7C6CtvvpPB_KfbXuO_IA" , 
-  authDomain : "quanlihocsinh-e29bd.firebaseapp.com" , 
-  databaseURL : "https://quanlihocsinh-e29bd-default-rtdb.firebaseio.com" , 
-  projectId : "quanlihocsinh-e29bd" , 
-  storageBucket : "quanlihocsinh-e29bd.firebasestorage.app" , 
-  messagingSenderId : "1011350811634" , 
-  appId : "1:1011350811634:web:70fe410edb1dab888d316b" , 
-  measurementId : "G-1ER2DQQF95" 
+            apiKey: "AIzaSyBASXjlpn_U81L7C6CtvvpPB_KfbXuO_IA",
+  authDomain: "quanlihocsinh-e29bd.firebaseapp.com",
+  databaseURL: "https://quanlihocsinh-e29bd-default-rtdb.firebaseio.com",
+  projectId: "quanlihocsinh-e29bd",
+  storageBucket: "quanlihocsinh-e29bd.firebasestorage.app",
+  messagingSenderId: "1011350811634",
+  appId: "1:1011350811634:web:70fe410edb1dab888d316b",
+  measurementId: "G-1ER2DQQF95"
         };
         // =========================================================================
 
-        let tasksRef;
+        // KIỂM TRA QUYỀN (GIÁO VIÊN HAY HỌC SINH) QUA ĐƯỜNG LINK
+        const urlParams = new URLSearchParams(window.location.search);
+        const isTeacher = urlParams.get('admin') === '1'; // Nếu link có đuôi ?admin=1 thì là giáo viên
 
-        // Cảnh báo nếu chưa dán mã cấu hình
-        if (firebaseConfig.apiKey === "BẠN_ĐIỀN_API_KEY_CỦA_BẠN_VÀO_ĐÂY") {
-            alert("⚠️ BẠN CHƯA DÁN MÃ FIREBASE VÀO CODE! HÃY MỞ FILE LÊN VÀ DÁN VÀO NHÉ.");
-        } else {
-            // Khởi tạo Firebase
+        if (isTeacher) {
+            document.body.classList.add('teacher-mode');
+            document.getElementById('pageTitle').innerText = "👨‍🏫 Quản Lý Nhiệm Vụ";
+            document.getElementById('statusText').innerText = "Chế độ Giáo viên (Được quyền Giao/Xóa việc)";
+            document.getElementById('submitBtn').style.display = 'none'; // Giáo viên không cần nút nộp bài
+        }
+
+        // Khởi tạo Firebase
+        if (firebaseConfig.apiKey !== "BẠN_ĐIỀN_API_KEY_CỦA_BẠN_VÀO_ĐÂY") {
             firebase.initializeApp(firebaseConfig);
             const database = firebase.database();
-            tasksRef = database.ref('nhiem-vu-cua-hoc-sinh');
+            var tasksRef = database.ref('nhiem-vu-cua-hoc-sinh');
 
-            // Lắng nghe dữ liệu để đồng bộ thời gian thực
             tasksRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 const ul = document.getElementById("taskList");
                 ul.innerHTML = ''; 
+                let completedCount = 0; // Đếm số việc đã tích
 
                 if (data) {
                     Object.keys(data).forEach(taskId => {
                         const task = data[taskId];
+                        if (task.completed) completedCount++;
 
                         const li = document.createElement("li");
                         if (task.completed) li.classList.add("completed");
                         
+                        // Cấu trúc hiển thị: Checkbox + Tên việc + [Nút Xóa cho GV] + Ô lý do
                         li.innerHTML = `
-                            <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask('${taskId}', this.checked)">
-                            <span class="task-text">${task.text}</span>
-                            <button class="delete-btn" onclick="deleteTask('${taskId}')">✖</button>
+                            <div style="display: flex; align-items: center; width: 100%;">
+                                <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask('${taskId}', this.checked)">
+                                <span class="task-text">${task.text}</span>
+                                <button class="delete-btn" onclick="deleteTask('${taskId}')">✖</button>
+                            </div>
+                            <input type="text" class="reason-input" placeholder="Ghi chú/Lý do (nếu có)..." value="${task.reason || ''}" onchange="updateReason('${taskId}', this.value)">
                         `;
                         ul.appendChild(li);
                     });
                 }
+
+                // Mở khóa nút Gửi nếu có ít nhất 1 việc được tích
+                if (!isTeacher) {
+                    const submitBtn = document.getElementById('submitBtn');
+                    if (completedCount > 0) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = "Gửi bài cho giáo viên 🚀";
+                    } else {
+                        submitBtn.disabled = true;
+                        submitBtn.innerText = "Hãy hoàn thành ít nhất 1 nhiệm vụ để nộp bài";
+                    }
+                }
             });
         }
 
-        // ================= CÁC HÀM XỬ LÝ SỰ KIỆN =================
+        // ================= CÁC HÀM XỬ LÝ DỮ LIỆU =================
         window.addTask = function() {
-            if (!tasksRef) return alert("Lỗi Firebase chưa được kết nối!");
+            if (!isTeacher) return; // Bảo mật kép: Chỉ chạy nếu là giáo viên
             let input = document.getElementById("taskInput");
-            let taskText = input.value.trim();
-            if (taskText === "") {
-                alert("Bạn quên nhập tên công việc rồi kìa! 🥺");
-                return;
-            }
+            if (input.value.trim() === "") return alert("Chưa nhập nhiệm vụ!");
             
             tasksRef.push({
-                text: taskText,
-                completed: false
+                text: input.value.trim(),
+                completed: false,
+                reason: ""
             });
             input.value = ""; 
         };
 
-        window.handleKeyPress = function(event) {
-            if (event.key === "Enter") window.addTask();
-        };
-
+        window.handleKeyPress = function(event) { if (event.key === "Enter") window.addTask(); };
+        
         window.toggleTask = function(taskId, isChecked) {
             if (tasksRef) tasksRef.child(taskId).update({ completed: isChecked });
         };
 
+        // Hàm mới: Lưu lý do của học sinh
+        window.updateReason = function(taskId, reasonText) {
+            if (tasksRef) tasksRef.child(taskId).update({ reason: reasonText });
+        };
+
         window.deleteTask = function(taskId) {
+            if (!isTeacher) return;
             if (tasksRef) tasksRef.child(taskId).remove();
         };
 
-        // ================= HIỆU ỨNG NÚT GỬI & PHÁO HOA =================
         window.sendToTeacher = function() {
             shootConfetti();
-            window.showModal();
+            document.getElementById('congratsModal').style.display = 'flex';
         };
 
         function shootConfetti() {
-            let duration = 3 * 1000;
-            let animationEnd = Date.now() + duration;
+            let duration = 3 * 1000, animationEnd = Date.now() + duration;
             let defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
-
             let interval = setInterval(function() {
-                let timeLeft = animationEnd - Date.now();
-                if (timeLeft <= 0) return clearInterval(interval);
-                
-                let particleCount = 50 * (timeLeft / duration);
-                confetti(Object.assign({}, defaults, { particleCount, origin: { x: 0.2, y: 0.8 } }));
-                confetti(Object.assign({}, defaults, { particleCount, origin: { x: 0.8, y: 0.8 } }));
+                if (Date.now() > animationEnd) return clearInterval(interval);
+                confetti(Object.assign({}, defaults, { particleCount: 50, origin: { x: 0.2, y: 0.8 } }));
+                confetti(Object.assign({}, defaults, { particleCount: 50, origin: { x: 0.8, y: 0.8 } }));
             }, 250);
         }
 
-        window.showModal = function() { document.getElementById('congratsModal').style.display = 'flex'; };
         window.closeModal = function() { document.getElementById('congratsModal').style.display = 'none'; };
     </script>
 </body>
