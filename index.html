@@ -62,7 +62,7 @@
 
     <div class="container">
         <h1 id="pageTitle">✨ Bảng Nhiệm Vụ Của Phương Anh ✨</h1>
-        <p class="subtitle" id="statusText">Cố gắng hoàn thành thật tốt nhé!</p>
+        <p class="subtitle" id="statusText">Em cố gắng hoàn thành thật tốt nhé!</p>
 
         <!-- THỐNG KÊ DÀNH RIÊNG CHO GIÁO VIÊN -->
         <div class="teacher-stats" id="teacherStatsBox">
@@ -83,14 +83,14 @@
         </ul>
         
         <!-- Nút Gửi bài của học sinh -->
-        <button id="submitBtn" class="send-btn" onclick="sendToTeacher()" disabled>Gửi bài cho giáo viên 🚀</button>
+        <button id="submitBtn" class="send-btn" onclick="sendToTeacher()" disabled>Gửi bài 🚀</button>
     </div>
 
     <!-- Hộp thoại -->
     <div class="modal" id="congratsModal">
         <div class="modal-content">
             <h2>Nộp bài thành công! 🎉</h2>
-            <p>Bài làm và lý do của Phương Anh đã được gửi đi!</p>
+            <p>Bài làm và lý do của Phương Anh đã được gửi tới chị Thùy Dung!</p>
             <button class="close-modal-btn" onclick="closeModal()">Đóng</button>
         </div>
     </div>
@@ -100,7 +100,7 @@
         // BƯỚC QUAN TRỌNG: ĐIỀN MÃ FIREBASE CỦA BẠN VÀO ĐÂY
         // =========================================================================
         const firebaseConfig = {
-           apiKey: "AIzaSyBASXjlpn_U81L7C6CtvvpPB_KfbXuO_IA",
+             apiKey: "AIzaSyBASXjlpn_U81L7C6CtvvpPB_KfbXuO_IA",
     authDomain: "quanlihocsinh-e29bd.firebaseapp.com",
     databaseURL: "https://quanlihocsinh-e29bd-default-rtdb.firebaseio.com",
     projectId: "quanlihocsinh-e29bd",
@@ -126,7 +126,6 @@
         if (firebaseConfig.apiKey === "BẠN_ĐIỀN_API_KEY_CỦA_BẠN_ĐÂY") {
             alert("⚠️ BẠN CHƯA DÁN MÃ FIREBASE VÀO CODE TRONG FILE INDEX.HTML!");
         } else {
-            // Khởi tạo an toàn (tránh lỗi trùng lặp app)
             if (!firebase.apps.length) {
                 firebase.initializeApp(firebaseConfig);
             }
@@ -141,6 +140,11 @@
                 const ul = document.getElementById("taskList");
                 ul.innerHTML = ''; 
                 let completedCount = 0;
+
+                // Nếu danh sách nhiệm vụ trống hoàn toàn (giáo viên đã xóa hết), tự động reset trạng thái nộp bài về 0
+                if (!data) {
+                    metaRef.remove();
+                }
 
                 if (data) {
                     Object.keys(data).forEach(taskId => {
@@ -166,7 +170,7 @@
                     const submitBtn = document.getElementById('submitBtn');
                     if (completedCount > 0) {
                         submitBtn.disabled = false;
-                        submitBtn.innerText = "Gửi bài 🚀";
+                        submitBtn.innerText = "Gửi bài cho giáo viên 🚀";
                     } else {
                         submitBtn.disabled = true;
                         submitBtn.innerText = "Hãy tích hoàn thành ít nhất 1 nhiệm vụ để nộp bài";
