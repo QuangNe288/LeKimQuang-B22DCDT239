@@ -3,65 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bảng Nhiệm Vụ 🌟</title>
+    <title>Bảng Nhiệm Vụ Hàng Ngày 🌟</title>
+    <!-- Font chữ dễ thương -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- Thư viện pháo hoa -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
-    <!-- Tích hợp Firebase v8 -->
+    <!-- Thư viện Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
-        :root { --bg-color: #fce4ec; --card-bg: #ffffff; --text-color: #4a4a4a; --primary-color: #ff8a80; --check-color: #00bfa5; }
-        body { font-family: 'Nunito', sans-serif; background-color: var(--bg-color); background-image: radial-gradient(#ffcdd2 2px, transparent 2px); background-size: 30px 30px; color: var(--text-color); display: flex; justify-content: center; padding: 40px 20px; margin: 0; }
-        .container { background-color: var(--card-bg); width: 100%; max-width: 500px; padding: 30px; border-radius: 25px; box-shadow: 0 10px 30px rgba(255, 138, 128, 0.2); text-align: center; position: relative; z-index: 1; }
+        :root {
+            --bg-color: #fce4ec; 
+            --card-bg: #ffffff;
+            --text-color: #4a4a4a;
+            --primary-color: #ff8a80; 
+            --check-color: #00bfa5; 
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#ffcdd2 2px, transparent 2px);
+            background-size: 30px 30px;
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+            margin: 0;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(255, 138, 128, 0.2);
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
         h1 { color: var(--primary-color); font-size: 28px; margin-bottom: 5px; }
         p.subtitle { color: #888; font-size: 16px; margin-bottom: 25px; }
+
         .input-section { display: flex; gap: 10px; margin-bottom: 25px; }
-        input[type="text"] { flex: 1; padding: 12px 20px; border: 2px solid #ffcdd2; border-radius: 15px; font-size: 16px; font-family: 'Nunito', sans-serif; outline: none; transition: 0.3s; }
-        button.add-btn { background-color: var(--primary-color); color: white; border: none; padding: 12px 25px; border-radius: 15px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid #ffcdd2;
+            border-radius: 15px;
+            font-size: 16px;
+            font-family: 'Nunito', sans-serif;
+            outline: none;
+            transition: 0.3s;
+        }
+        input[type="text"]:focus { border-color: var(--primary-color); }
+
+        button.add-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            font-family: 'Nunito', sans-serif;
+        }
+        button.add-btn:hover { background-color: #ff5252; transform: translateY(-2px); }
+
         ul { list-style: none; padding: 0; margin: 0; }
-        li { background-color: #f9fbe7; margin-bottom: 15px; padding: 15px 20px; border-radius: 15px; display: flex; align-items: center; font-size: 18px; font-weight: 600; transition: 0.3s; border: 2px dashed transparent; }
-        input[type="checkbox"] { width: 24px; height: 24px; margin-right: 15px; accent-color: var(--check-color); cursor: pointer; }
-        li.completed { background-color: #e0f2f1; color: #9e9e9e; text-decoration: line-through; border-color: transparent; }
-        .delete-btn { margin-left: auto; background: none; border: none; font-size: 20px; cursor: pointer; color: #ff8a80; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: white; padding: 40px; border-radius: 25px; text-align: center; max-width: 350px; }
-        .modal-content h2 { color: #ff5252; margin-top: 0; }
-        .close-modal-btn { background-color: var(--check-color); color: white; border: none; padding: 12px 30px; border-radius: 15px; cursor: pointer; font-weight: bold; }
+        
+        li {
+            background-color: #f9fbe7; 
+            margin-bottom: 15px;
+            padding: 15px 20px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            font-size: 18px;
+            font-weight: 600;
+            transition: 0.3s;
+            border: 2px dashed transparent;
+        }
+        li:hover { transform: scale(1.02); border-color: #dce775; }
+
+        input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            margin-right: 15px;
+            accent-color: var(--check-color);
+            cursor: pointer;
+        }
+
+        li.completed {
+            background-color: #e0f2f1;
+            color: #9e9e9e;
+            text-decoration: line-through;
+            border-color: transparent;
+        }
+        li.completed .task-text { opacity: 0.7; }
+
+        .delete-btn {
+            margin-left: auto;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #ff8a80;
+            transition: 0.3s;
+        }
+        .delete-btn:hover { color: #d32f2f; transform: scale(1.2); }
+
+        /* Nút gửi cho giáo viên */
+        .send-btn {
+            background-color: #4CAF50; 
+            color: white; 
+            border: none; 
+            padding: 15px 30px;
+            border-radius: 15px; 
+            font-size: 18px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            width: 100%; 
+            margin-top: 20px; 
+            transition: 0.3s; 
+            font-family: 'Nunito', sans-serif;
+        }
+        .send-btn:hover { background-color: #45a049; transform: translateY(-2px); }
+
+        /* Bảng chúc mừng */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4); justify-content: center; align-items: center;
+            z-index: 1000; animation: fadeIn 0.3s ease-in-out;
+        }
+        .modal-content {
+            background: white; padding: 40px; border-radius: 25px;
+            text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 350px; transform: scale(0.8); animation: popUp 0.3s forwards;
+        }
+        .modal-content h2 { color: #ff5252; font-size: 26px; margin-top: 0; margin-bottom: 10px; }
+        .modal-content p { font-size: 18px; color: #555; margin-bottom: 25px; }
+        .close-modal-btn {
+            background-color: var(--check-color); color: white; border: none;
+            padding: 12px 30px; border-radius: 15px; font-size: 18px; font-weight: bold;
+            cursor: pointer; transition: 0.3s; font-family: 'Nunito', sans-serif;
+        }
+        .close-modal-btn:hover { background-color: #009688; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes popUp { to { transform: scale(1); } }
     </style>
 </head>
 <body>
 
     <div class="container">
         <h1>✨ Nhật Ký Nhiệm Vụ ✨</h1>
-        <p class="subtitle">Online Đồng Bộ Thời Gian Thực</p>
+        <p class="subtitle">Những việc hôm nay Phương Anh cần làm  🟢</p>
 
         <div class="input-section">
-            <input type="text" id="taskInput" placeholder="Nhập công việc..." onkeypress="handleKeyPress(event)">
+            <input type="text" id="taskInput" placeholder="Ví dụ: Làm bài tập Toán 📚..." onkeypress="handleKeyPress(event)">
             <button class="add-btn" onclick="addTask()">Thêm</button>
         </div>
 
         <ul id="taskList">
-            <!-- Dữ liệu sẽ hiển thị ở đây -->
+            <!-- Dữ liệu tải từ mạng sẽ hiển thị ở đây -->
         </ul>
+        
+        <!-- SEND -->
+        <button class="send-btn" onclick="sendToTeacher()">SEND🚀</button>
     </div>
 
-    <!-- Hộp thoại chúc mừng -->
+    <!-- Hộp thoại chúc mừng khi Gửi -->
     <div class="modal" id="congratsModal">
         <div class="modal-content">
             <h2>Tuyệt vời quá! 🎉</h2>
-            <p>Đã hoàn thành 5 nhiệm vụ!</p>
+            <p>Báo cáo của Panh đã được gửi thành công. Em iu làm tốt lắm! 🌟</p>
             <button class="close-modal-btn" onclick="closeModal()">Đóng</button>
         </div>
     </div>
 
     <script>
-        // ==================================================================
-        // BƯỚC QUAN TRỌNG: COPY VÀ DÁN MÃ FIREBASE CỦA BẠN VÀO ĐÂY
-        // ==================================================================
+        // =========================================================================
+        // BƯỚC QUAN TRỌNG: COPY CẤU HÌNH FIREBASE CỦA BẠN VÀ DÁN VÀO BÊN DƯỚI
+        // (Xóa chữ tiếng Việt và dán vào giữa 2 dấu ngoặc kép "")
+        // =========================================================================
         const firebaseConfig = {
-              apiKey : "AIzaSyBASXjlpn_U81L7C6CtvvpPB_KfbXuO_IA" , 
+             apiKey : "AIzaSyBASXjlpn_U81L7C6CtvvpPB_KfbXuO_IA" , 
   authDomain : "quanlihocsinh-e29bd.firebaseapp.com" , 
   databaseURL : "https://quanlihocsinh-e29bd-default-rtdb.firebaseio.com" , 
   projectId : "quanlihocsinh-e29bd" , 
@@ -70,33 +204,31 @@
   appId : "1:1011350811634:web:70fe410edb1dab888d316b" , 
   measurementId : "G-1ER2DQQF95" 
         };
+        // =========================================================================
 
-        // Hệ thống tự kiểm tra lỗi
-        if (firebaseConfig.apiKey === "DÁN_API_KEY_CỦA_BẠN_VÀO_ĐÂY") {
-            alert("⚠️ Lỗi: Bạn chưa dán mã cấu hình Firebase vào file Code!");
-        } else if (!firebaseConfig.databaseURL) {
-            alert("⚠️ Lỗi: Mã cấu hình của bạn bị thiếu dòng 'databaseURL'. Hãy bổ sung nó!");
+        let tasksRef;
+
+        // Cảnh báo nếu chưa dán mã cấu hình
+        if (firebaseConfig.apiKey === "BẠN_ĐIỀN_API_KEY_CỦA_BẠN_VÀO_ĐÂY") {
+            alert("⚠️ BẠN CHƯA DÁN MÃ FIREBASE VÀO CODE! HÃY MỞ FILE LÊN VÀ DÁN VÀO NHÉ.");
         } else {
-            // Khởi tạo Firebase nếu mã đã được dán
+            // Khởi tạo Firebase
             firebase.initializeApp(firebaseConfig);
             const database = firebase.database();
-            const tasksRef = database.ref('nhiem-vu');
-            let hasCelebrated = false;
+            tasksRef = database.ref('nhiem-vu-cua-hoc-sinh');
 
-            // Tải dữ liệu từ mạng
+            // Lắng nghe dữ liệu để đồng bộ thời gian thực
             tasksRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 const ul = document.getElementById("taskList");
                 ul.innerHTML = ''; 
-                let completedCount = 0;
 
                 if (data) {
                     Object.keys(data).forEach(taskId => {
                         const task = data[taskId];
-                        if (task.completed) completedCount++;
 
                         const li = document.createElement("li");
-                        if(task.completed) li.classList.add("completed");
+                        if (task.completed) li.classList.add("completed");
                         
                         li.innerHTML = `
                             <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask('${taskId}', this.checked)">
@@ -106,46 +238,61 @@
                         ul.appendChild(li);
                     });
                 }
-                checkMilestones(completedCount);
             });
-
-            // Gán các hàm vào đối tượng window để nút HTML có thể gọi được
-            window.addTask = function() {
-                let input = document.getElementById("taskInput");
-                let taskText = input.value.trim();
-                if (taskText === "") return;
-                tasksRef.push({ text: taskText, completed: false });
-                input.value = ""; 
-            }
-
-            window.handleKeyPress = function(event) { if (event.key === "Enter") addTask(); }
-            window.toggleTask = function(taskId, isChecked) { tasksRef.child(taskId).update({ completed: isChecked }); }
-            window.deleteTask = function(taskId) { tasksRef.child(taskId).remove(); }
-            
-            function checkMilestones(completedCount) {
-                if (completedCount >= 5 && !hasCelebrated) {
-                    hasCelebrated = true; shootConfetti(); showModal();
-                } else if (completedCount < 5) {
-                    hasCelebrated = false;
-                }
-            }
-
-            function shootConfetti() {
-                let duration = 3 * 1000;
-                let animationEnd = Date.now() + duration;
-                let defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
-                let interval = setInterval(function() {
-                    let timeLeft = animationEnd - Date.now();
-                    if (timeLeft <= 0) return clearInterval(interval);
-                    let particleCount = 50 * (timeLeft / duration);
-                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: 0.2, y: 0.8 } }));
-                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: 0.8, y: 0.8 } }));
-                }, 250);
-            }
-
-            window.showModal = function() { document.getElementById('congratsModal').style.display = 'flex'; }
-            window.closeModal = function() { document.getElementById('congratsModal').style.display = 'none'; }
         }
+
+        // ================= CÁC HÀM XỬ LÝ SỰ KIỆN =================
+        window.addTask = function() {
+            if (!tasksRef) return alert("Lỗi Firebase chưa được kết nối!");
+            let input = document.getElementById("taskInput");
+            let taskText = input.value.trim();
+            if (taskText === "") {
+                alert("Bạn quên nhập tên công việc rồi kìa! 🥺");
+                return;
+            }
+            
+            tasksRef.push({
+                text: taskText,
+                completed: false
+            });
+            input.value = ""; 
+        };
+
+        window.handleKeyPress = function(event) {
+            if (event.key === "Enter") window.addTask();
+        };
+
+        window.toggleTask = function(taskId, isChecked) {
+            if (tasksRef) tasksRef.child(taskId).update({ completed: isChecked });
+        };
+
+        window.deleteTask = function(taskId) {
+            if (tasksRef) tasksRef.child(taskId).remove();
+        };
+
+        // ================= HIỆU ỨNG NÚT GỬI & PHÁO HOA =================
+        window.sendToTeacher = function() {
+            shootConfetti();
+            window.showModal();
+        };
+
+        function shootConfetti() {
+            let duration = 3 * 1000;
+            let animationEnd = Date.now() + duration;
+            let defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+
+            let interval = setInterval(function() {
+                let timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) return clearInterval(interval);
+                
+                let particleCount = 50 * (timeLeft / duration);
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: 0.2, y: 0.8 } }));
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: 0.8, y: 0.8 } }));
+            }, 250);
+        }
+
+        window.showModal = function() { document.getElementById('congratsModal').style.display = 'flex'; };
+        window.closeModal = function() { document.getElementById('congratsModal').style.display = 'none'; };
     </script>
 </body>
 </html>
