@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bảng Nhiệm Vụ 🌟</title>
+    <title>Bảng Nhiệm Vụ Của Phương Anh 🌟</title>
     <!-- Font chữ -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -16,14 +16,14 @@
         :root { --bg-color: #fce4ec; --card-bg: #ffffff; --text-color: #4a4a4a; --primary-color: #ff8a80; --check-color: #00bfa5; }
         body { font-family: 'Nunito', sans-serif; background-color: var(--bg-color); background-image: radial-gradient(#ffcdd2 2px, transparent 2px); background-size: 30px 30px; color: var(--text-color); display: flex; justify-content: center; padding: 40px 20px; margin: 0; }
         .container { background-color: var(--card-bg); width: 100%; max-width: 600px; padding: 30px; border-radius: 25px; box-shadow: 0 10px 30px rgba(255, 138, 128, 0.2); text-align: center; position: relative; z-index: 1; }
+        
         h1 { color: var(--primary-color); font-size: 28px; margin-bottom: 5px; }
         p.subtitle { color: #888; font-size: 16px; margin-bottom: 25px; }
 
-        /* MẶC ĐỊNH ẨN KHU VỰC THÊM/XÓA CỦA GIÁO VIÊN */
+        /* KHU VỰC THÊM/XÓA CỦA GIÁO VIÊN (Chỉ hiện khi có ?admin=1) */
         .input-section { display: none; gap: 10px; margin-bottom: 25px; }
         .delete-btn { display: none; margin-left: auto; background: none; border: none; font-size: 20px; cursor: pointer; color: #ff8a80; transition: 0.3s; }
         
-        /* HIỂN THỊ KHI Ở CHẾ ĐỘ GIÁO VIÊN */
         .teacher-mode .input-section { display: flex; }
         .teacher-mode .delete-btn { display: inline-block; }
 
@@ -34,18 +34,22 @@
         li { background-color: #f9fbe7; margin-bottom: 15px; padding: 15px 20px; border-radius: 15px; display: flex; align-items: center; flex-wrap: wrap; font-size: 18px; font-weight: 600; transition: 0.3s; }
         input[type="checkbox"] { width: 24px; height: 24px; margin-right: 15px; accent-color: var(--check-color); cursor: pointer; }
         
-        /* Ô nhập lý do của học sinh */
+        /* Ô nhập lý do */
         .reason-input { width: 100%; margin-top: 10px; padding: 8px 15px; border: 1px dashed #ccc; border-radius: 10px; font-size: 14px; font-family: 'Nunito', sans-serif; outline: none; }
         .reason-input:focus { border-color: var(--check-color); }
         
         li.completed { background-color: #e0f2f1; color: #9e9e9e; }
         li.completed .task-text { text-decoration: line-through; opacity: 0.7; }
 
+        /* Bảng thống kê nộp bài dành cho giáo viên */
+        .teacher-stats { background: #fff3e0; border: 2px solid #ffe0b2; padding: 15px; border-radius: 15px; margin-bottom: 25px; text-align: left; display: none; }
+        .teacher-mode .teacher-stats { display: block; }
+        .teacher-stats h3 { margin: 0 0 10px 0; color: #f57c00; font-size: 18px; }
+        .teacher-stats p { margin: 5px 0; font-size: 15px; color: #555; }
+
         /* Nút gửi */
         .send-btn { background-color: #4CAF50; color: white; border: none; padding: 15px 30px; border-radius: 15px; font-size: 18px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 20px; transition: 0.3s; font-family: 'Nunito', sans-serif; }
-        
-        /* Trạng thái khóa nút Gửi khi chưa làm bài */
-        .send-btn:disabled { background-color: #cccccc; cursor: not-allowed; opacity: 0.7; transform: none !important; }
+        .send-btn:disabled { background-color: #cccccc; cursor: not-allowed; opacity: 0.7; }
         .send-btn:not(:disabled):hover { background-color: #45a049; transform: translateY(-2px); }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); justify-content: center; align-items: center; z-index: 1000; }
@@ -57,12 +61,20 @@
 <body>
 
     <div class="container">
-        <h1 id="pageTitle">✨ Nhiệm Vụ Hôm Nay ✨</h1>
-        <p class="subtitle" id="statusText">Dành cho học sinh</p>
+        <h1 id="pageTitle">✨ Bảng Nhiệm Vụ Của Phương Anh ✨</h1>
+        <p class="subtitle" id="statusText">Cố gắng hoàn thành thật tốt nhé!</p>
 
-        <!-- Khu vực này sẽ TỰ ĐỘNG ẨN đối với học sinh -->
+        <!-- THỐNG KÊ DÀNH RIÊNG CHO GIÁO VIÊN -->
+        <div class="teacher-stats" id="teacherStatsBox">
+            <h3>📊 Thống kê bài nộp của Phương Anh:</h3>
+            <p id="submitStatus"><b>Trạng thái:</b> Chưa nộp bài</p>
+            <p id="submitCount"><b>Số lần nộp:</b> 0 lần</p>
+            <p id="submitTime"><b>Thời gian nộp gần nhất:</b> Chưa có</p>
+        </div>
+
+        <!-- Ô GIAO VIỆC -->
         <div class="input-section">
-            <input type="text" id="taskInput" class="task-input" placeholder="Giáo viên nhập nhiệm vụ..." onkeypress="handleKeyPress(event)">
+            <input type="text" id="taskInput" class="task-input" placeholder="Thêm nhiệm vụ cho Phương Anh..." onkeypress="handleKeyPress(event)">
             <button class="add-btn" onclick="addTask()">Giao việc</button>
         </div>
 
@@ -70,57 +82,56 @@
             <!-- Dữ liệu hiển thị ở đây -->
         </ul>
         
-        <!-- Nút Gửi bị khóa mặc định (disabled) -->
+        <!-- Nút Gửi bài của học sinh -->
         <button id="submitBtn" class="send-btn" onclick="sendToTeacher()" disabled>Gửi bài cho giáo viên 🚀</button>
     </div>
 
     <!-- Hộp thoại -->
     <div class="modal" id="congratsModal">
         <div class="modal-content">
-            <h2>Hoàn thành! 🎉</h2>
-            <p>Báo cáo và lý do của em đã được gửi thành công. Làm tốt lắm!</p>
+            <h2>Nộp bài thành công! 🎉</h2>
+            <p>Bài làm và lý do của Phương Anh đã được gửi tới cô giáo!</p>
             <button class="close-modal-btn" onclick="closeModal()">Đóng</button>
         </div>
     </div>
 
     <script>
         // =========================================================================
-        // ĐIỀN MÃ FIREBASE CỦA BẠN VÀO ĐÂY (GIỮ NGUYÊN DẤU NGOẶC KÉP "")
+        // ĐIỀN MÃ FIREBASE CỦA BẠN VÀO ĐÂY
         // =========================================================================
         const firebaseConfig = {
-           apiKey: "AIzaSyBASXjlpn_U81L7C6CtvvpPB_KfbXuO_IA",
-    authDomain: "quanlihocsinh-e29bd.firebaseapp.com",
-    databaseURL: "https://quanlihocsinh-e29bd-default-rtdb.firebaseio.com",
-    projectId: "quanlihocsinh-e29bd",
-    storageBucket: "quanlihocsinh-e29bd.firebasestorage.app",
-    messagingSenderId: "1011350811634",
-    appId: "1:1011350811634:web:70fe410edb1dab888d316b",
-    measurementId: "G-1ER2DQQF95"
+            apiKey: "BẠN_ĐIỀN_API_KEY_CỦA_BẠN_ĐÂY",
+            authDomain: "BẠN_ĐIỀN_AUTH_DOMAIN_VÀO_ĐÂY",
+            databaseURL: "BẠN_ĐIỀN_LINK_DATABASE_VÀO_ĐÂY",
+            projectId: "BẠN_ĐIỀN_PROJECT_ID_VÀO_ĐÂY",
+            storageBucket: "BẠN_ĐIỀN_STORAGE_BUCKET_VÀO_ĐÂY",
+            messagingSenderId: "BẠN_ĐIỀN_SENDER_ID_VÀO_ĐÂY",
+            appId: "BẠN_ĐIỀN_APP_ID_VÀO_ĐÂY"
         };
         // =========================================================================
 
-        // KIỂM TRA QUYỀN (GIÁO VIÊN HAY HỌC SINH) QUA ĐƯỜNG LINK
         const urlParams = new URLSearchParams(window.location.search);
-        const isTeacher = urlParams.get('admin') === '1'; // Nếu link có đuôi ?admin=1 thì là giáo viên
+        const isTeacher = urlParams.get('admin') === '1';
 
         if (isTeacher) {
             document.body.classList.add('teacher-mode');
-            document.getElementById('pageTitle').innerText = "👨‍🏫 Quản Lý Nhiệm Vụ";
-            document.getElementById('statusText').innerText = "Chế độ Giáo viên (Được quyền Giao/Xóa việc)";
-            document.getElementById('submitBtn').style.display = 'none'; // Giáo viên không cần nút nộp bài
+            document.getElementById('pageTitle').innerText = "👨‍🏫 Quản Lý Bài Của Phương Anh";
+            document.getElementById('statusText').innerText = "Chế độ Giáo viên";
+            document.getElementById('submitBtn').style.display = 'none';
         }
 
-        // Khởi tạo Firebase
-        if (firebaseConfig.apiKey !== "BẠN_ĐIỀN_API_KEY_CỦA_BẠN_VÀO_ĐÂY") {
+        if (firebaseConfig.apiKey !== "BẠN_ĐIỀN_API_KEY_CỦA_BẠN_ĐÂY") {
             firebase.initializeApp(firebaseConfig);
             const database = firebase.database();
-            var tasksRef = database.ref('nhiem-vu-cua-hoc-sinh');
+            var tasksRef = database.ref('phuong-anh/nhiem-vu');
+            var metaRef = database.ref('phuong-anh/thong-tin-nop');
 
+            // Lắng nghe dữ liệu nhiệm vụ
             tasksRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 const ul = document.getElementById("taskList");
                 ul.innerHTML = ''; 
-                let completedCount = 0; // Đếm số việc đã tích
+                let completedCount = 0;
 
                 if (data) {
                     Object.keys(data).forEach(taskId => {
@@ -130,20 +141,18 @@
                         const li = document.createElement("li");
                         if (task.completed) li.classList.add("completed");
                         
-                        // Cấu trúc hiển thị: Checkbox + Tên việc + [Nút Xóa cho GV] + Ô lý do
                         li.innerHTML = `
                             <div style="display: flex; align-items: center; width: 100%;">
                                 <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask('${taskId}', this.checked)">
                                 <span class="task-text">${task.text}</span>
                                 <button class="delete-btn" onclick="deleteTask('${taskId}')">✖</button>
                             </div>
-                            <input type="text" class="reason-input" placeholder="Ghi chú/Lý do (nếu có)..." value="${task.reason || ''}" onchange="updateReason('${taskId}', this.value)">
+                            <input type="text" class="reason-input" placeholder="Lý do/Ghi chú của Phương Anh..." value="${task.reason || ''}" onchange="updateReason('${taskId}', this.value)">
                         `;
                         ul.appendChild(li);
                     });
                 }
 
-                // Mở khóa nút Gửi nếu có ít nhất 1 việc được tích
                 if (!isTeacher) {
                     const submitBtn = document.getElementById('submitBtn');
                     if (completedCount > 0) {
@@ -151,43 +160,53 @@
                         submitBtn.innerText = "Gửi bài cho giáo viên 🚀";
                     } else {
                         submitBtn.disabled = true;
-                        submitBtn.innerText = "Hãy hoàn thành ít nhất 1 nhiệm vụ để nộp bài";
+                        submitBtn.innerText = "Hãy tích hoàn thành ít nhất 1 nhiệm vụ để nộp bài";
                     }
+                }
+            });
+
+            // Lắng nghe thông tin nộp bài (Hiển thị cho giáo viên)
+            metaRef.on('value', (snapshot) => {
+                const meta = snapshot.val();
+                if (meta) {
+                    document.getElementById('submitStatus').innerHTML = `<b>Trạng thái:</b> <span style="color: green;">Đã nộp bài ✅</span>`;
+                    document.getElementById('submitCount').innerHTML = `<b>Số lần nộp:</b> ${meta.count || 0} lần`;
+                    document.getElementById('submitTime').innerHTML = `<b>Thời gian nộp gần nhất:</b> ${meta.lastTime || 'Chưa có'}`;
                 }
             });
         }
 
-        // ================= CÁC HÀM XỬ LÝ DỮ LIỆU =================
+        // CÁC HÀM XỬ LÝ
         window.addTask = function() {
-            if (!isTeacher) return; // Bảo mật kép: Chỉ chạy nếu là giáo viên
+            if (!isTeacher) return;
             let input = document.getElementById("taskInput");
             if (input.value.trim() === "") return alert("Chưa nhập nhiệm vụ!");
-            
-            tasksRef.push({
-                text: input.value.trim(),
-                completed: false,
-                reason: ""
-            });
+            tasksRef.push({ text: input.value.trim(), completed: false, reason: "" });
             input.value = ""; 
         };
 
         window.handleKeyPress = function(event) { if (event.key === "Enter") window.addTask(); };
-        
-        window.toggleTask = function(taskId, isChecked) {
-            if (tasksRef) tasksRef.child(taskId).update({ completed: isChecked });
-        };
+        window.toggleTask = function(taskId, isChecked) { if (tasksRef) tasksRef.child(taskId).update({ completed: isChecked }); };
+        window.updateReason = function(taskId, reasonText) { if (tasksRef) tasksRef.child(taskId).update({ reason: reasonText }); };
+        window.deleteTask = function(taskId) { if (isTeacher && tasksRef) tasksRef.child(taskId).remove(); };
 
-        // Hàm mới: Lưu lý do của học sinh
-        window.updateReason = function(taskId, reasonText) {
-            if (tasksRef) tasksRef.child(taskId).update({ reason: reasonText });
-        };
-
-        window.deleteTask = function(taskId) {
-            if (!isTeacher) return;
-            if (tasksRef) tasksRef.child(taskId).remove();
-        };
-
+        // Xử lý khi Phương Anh bấm Gửi bài
         window.sendToTeacher = function() {
+            const now = new Date();
+            const timeString = now.toLocaleDateString('vi-VN') + ' lúc ' + now.toLocaleTimeString('vi-VN');
+
+            // Đọc số lần nộp hiện tại rồi cộng thêm 1
+            database.ref('phuong-anh/thong-tin-nop').once('value').then((snapshot) => {
+                const currentData = snapshot.val() || { count: 0 };
+                const newCount = currentData.count + 1;
+
+                // Lưu lại lịch sử lên Firebase
+                database.ref('phuong-anh/thong-tin-nop').set({
+                    count: newCount,
+                    lastTime: timeString
+                });
+            });
+
             shootConfetti();
             document.getElementById('congratsModal').style.display = 'flex';
         };
